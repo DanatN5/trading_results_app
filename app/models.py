@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, DateTime, String
+from sqlalchemy import Integer, DateTime, String, Date
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from .database import Base
@@ -17,6 +17,6 @@ class TradingResults(Base):
     volume: Mapped[int] = mapped_column(Integer)
     total: Mapped[int] = mapped_column(Integer)
     count: Mapped[int] = mapped_column(Integer)
-    date: Mapped[datetime] = mapped_column(DateTime)
+    date: Mapped[datetime.date] = mapped_column(Date)
     created_on: Mapped[datetime] = mapped_column(DateTime)
     updated_on: Mapped[datetime] = mapped_column(DateTime)
