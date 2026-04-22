@@ -4,9 +4,9 @@ from .schemas import FiltersBase
 
 
 def get_filters(
-        oil_id: Optional[str] = Query(None),
-        delivery_type_id: Optional[int] = Query(None),
-        delivery_basis_id: Optional[str] = Query(None),
+        oil_id: Optional[list[str]] = Query(None),
+        delivery_type_id: Optional[list[str]] = Query(None),
+        delivery_basis_id: Optional[list[str]] = Query(None),
 ):
     return FiltersBase(
         oil_id=oil_id,

@@ -25,14 +25,41 @@ async def get_last_trading_dates(db: AsyncSession = Depends(get_db), days_count:
     return dates.scalars().all()
 
 
-@router.get('/dynamics')
-async def get_dynamics(filters: FiltersBase = Depends(get_filters), db: AsyncSession = Depends(get_db)):
+@router.get('/get_trading_results')
+async def get_trading_results(
+    filters: FiltersBase = Depends(get_filters),
+    db: AsyncSession = Depends(get_db)
+    ):
+
     query = select(TradingResults)
 
-    if filters.start_date:
-        query = query.where(TradingResults.date > filters.start_date)
+    if filters.oil_id:
+        query = query.where(TradingResults.oil_id.in_(filters.oil_id))
+    if filters.delivery_basis_id:
+        query = query.where(TradingResults.delivery_basis_id.in_(filters.delivery_basis_id))
+    if filters.delivery_type_id:
+        query = query.where(TradingResults.delivery_type_id.in_(filters.delivery_type_id))
 
-    dynamics = await db.execute(query)
-    return dynamics.scalars().all()
+    results = await db.execute(query)
+    return results.scalars().all()
     
 
+
+@router.get('/get_dynamics')
+async def get_dynamics(
+    # dates: DatesBase,
+    filters: FiltersBase = Depends(get_filters),
+    db: AsyncSession = Depends(get_db)
+    ):
+
+    query = select(TradingResults)#.where(TradingResults.date.between(dates))
+
+    if filters.oil_id:
+        query = query.where(TradingResults.oil_id.in_(filters.oil_id))
+    if filters.delivery_basis_id:
+        query = query.where(TradingResults.delivery_basis_id.in_(filters.delivery_basis_id))
+    if filters.delivery_type_id:
+        query = query.where(TradingResults.delivery_type_id.in_(filters.delivery_type_id))
+    
+    dynamics = await db.execute(query)
+    return dynamics.scalars().all()

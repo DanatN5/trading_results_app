@@ -13,7 +13,7 @@ class TradingResults(Base):
     oil_id: Mapped[str] = mapped_column(String)
     delivery_basis_id: Mapped[str] = mapped_column(String)
     delivery_basis_name: Mapped[str] = mapped_column(String)
-    delivery_type_id: Mapped[int] = mapped_column(Integer)
+    delivery_type_id: Mapped[str] = mapped_column(String)
     volume: Mapped[int] = mapped_column(Integer)
     total: Mapped[int] = mapped_column(Integer)
     count: Mapped[int] = mapped_column(Integer)

@@ -1,17 +1,15 @@
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import date
+from datetime import datetime
+
 
 
 class FiltersBase(BaseModel):
-    oil_id: Optional[str] = None
-    delivery_type_id: Optional[int] = None
-    delivery_basis_id: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
+    oil_id: Optional[list[str]] = None
+    delivery_type_id: Optional[list[str]] = None
+    delivery_basis_id: Optional[list[str]] = None
 
 
-
-# class DynamicsFilterBase(FiltersBase):
-#     start_date: date
-#     end_date: date
+# class DatesBase(BaseModel):
+#     start_date: datetime = Field(..., )
+#     end_date: datetime = Field(..., gt=start_date)
