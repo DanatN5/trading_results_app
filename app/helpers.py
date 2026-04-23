@@ -1,19 +1,23 @@
-import json
 import hashlib
-from datetime import datetime
+import json
+from datetime import datetime, timedelta
+
 from .models import TradingResults
-
-
-
 
 
 def get_query(query, filters):
     if filters.oil_id:
         query = query.where(TradingResults.oil_id.in_(filters.oil_id))
     if filters.delivery_basis_id:
-        query = query.where(TradingResults.delivery_basis_id.in_(filters.delivery_basis_id))
+        query = query.where(
+            TradingResults.
+            delivery_basis_id.in_(filters.delivery_basis_id)
+            )
     if filters.delivery_type_id:
-        query = query.where(TradingResults.delivery_type_id.in_(filters.delivery_type_id))
+        query = query.where(
+            TradingResults.
+            delivery_type_id.in_(filters.delivery_type_id)
+            )
 
     return query
 
@@ -29,6 +33,7 @@ def get_date_for_prefix(date: dict[str: datetime]) -> str:
 
     return f"{start_date}-{end_date}"
 
+
 def to_dict(obj):
     result = {}
     for col in obj.__table__.columns:
@@ -37,3 +42,15 @@ def to_dict(obj):
             value = value.isoformat()
         result[col.name] = value
     return result
+
+
+def get_ttl() -> int:
+
+    hour = 14
+    minutes = 59
+
+    now = datetime.now()
+    tomorrow = (now + timedelta(days=1)).replace(hour=hour, minute=minutes)
+    ttl = int((tomorrow - now).total_seconds())
+
+    return ttl

@@ -1,7 +1,7 @@
 import os
-from dotenv import load_dotenv
 
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 load_dotenv()
@@ -16,6 +16,7 @@ DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{D
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+
 
 class Base(DeclarativeBase):
     pass

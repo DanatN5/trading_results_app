@@ -1,8 +1,10 @@
 from typing import Optional
+
 from fastapi import Query
-from .schemas import FiltersBase
-from .redis_config import redis_client
+
 from .database import AsyncSessionLocal
+from .redis_config import redis_client
+from .schemas import FiltersBase
 
 
 def get_filters(
