@@ -8,6 +8,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "fastapi[all]>=0.136.0",
     "python-dotenv>=1.2.2",
+    "redis>=7.4.0",
     "sqlalchemy>=2.0.49",
 ]
 

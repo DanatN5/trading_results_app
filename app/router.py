@@ -1,18 +1,14 @@
 from fastapi import Depends, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
-from .database import AsyncSessionLocal
 from .models import TradingResults
 from .schemas import FiltersBase, PeriodBase
-from .dependencies import get_filters
+from .dependencies import get_filters,  get_db, get_redis
+
 
 
 
 router = APIRouter()
-
-async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session
 
 
 @router.get('/trading_days')

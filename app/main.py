@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import Response
 from .router import router
 
@@ -8,7 +8,6 @@ import yaml
 app = FastAPI()
 
 app.include_router(router=router, prefix='/v1')
-
 
 
 @app.get('/api/healthchecker')
