@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from .database import AsyncSessionLocal
 from .models import TradingResults
-from .schemas import FiltersBase
+from .schemas import FiltersBase, PeriodBase
 from .dependencies import get_filters
 
 
@@ -32,34 +32,36 @@ async def get_trading_results(
     ):
 
     query = select(TradingResults)
-
-    if filters.oil_id:
-        query = query.where(TradingResults.oil_id.in_(filters.oil_id))
-    if filters.delivery_basis_id:
-        query = query.where(TradingResults.delivery_basis_id.in_(filters.delivery_basis_id))
-    if filters.delivery_type_id:
-        query = query.where(TradingResults.delivery_type_id.in_(filters.delivery_type_id))
+    if filters:
+        query = get_query(query, filters)
 
     results = await db.execute(query)
     return results.scalars().all()
     
 
 
-@router.get('/get_dynamics')
+@router.post('/get_dynamics')
 async def get_dynamics(
-    # dates: DatesBase,
+    peirod: PeriodBase,
     filters: FiltersBase = Depends(get_filters),
     db: AsyncSession = Depends(get_db)
     ):
 
-    query = select(TradingResults)#.where(TradingResults.date.between(dates))
+    query = select(TradingResults).where(TradingResults.date.between(peirod.start_date, peirod.end_date))
+    if filters:
+        query = get_query(query, filters)
+    
+    dynamics = await db.execute(query)
+    return dynamics.scalars().all()
 
+
+
+def get_query(query, filters):
     if filters.oil_id:
         query = query.where(TradingResults.oil_id.in_(filters.oil_id))
     if filters.delivery_basis_id:
         query = query.where(TradingResults.delivery_basis_id.in_(filters.delivery_basis_id))
     if filters.delivery_type_id:
         query = query.where(TradingResults.delivery_type_id.in_(filters.delivery_type_id))
-    
-    dynamics = await db.execute(query)
-    return dynamics.scalars().all()
+
+    return query
