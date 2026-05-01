@@ -14,8 +14,8 @@ class PeriodBase(BaseModel):
     start_date: datetime = Field(..., lt=datetime.now())
     end_date: datetime
 
-    @field_validator('end_date')
+    @field_validator("end_date")
     def check_start_date(cls, val, values):
-        if val < values.data.get("start_date"):
+        if val < values.data["start_date"]:
             raise ValueError("Конечная дата должна быть раньше начальной")
         return val

@@ -2,7 +2,7 @@ import hashlib
 import json
 from datetime import datetime, timedelta
 
-from .models import TradingResults
+from app.models import TradingResults
 
 
 def get_query(query, filters):
@@ -10,14 +10,12 @@ def get_query(query, filters):
         query = query.where(TradingResults.oil_id.in_(filters.oil_id))
     if filters.delivery_basis_id:
         query = query.where(
-            TradingResults.
-            delivery_basis_id.in_(filters.delivery_basis_id)
-            )
+            TradingResults.delivery_basis_id.in_(filters.delivery_basis_id)
+        )
     if filters.delivery_type_id:
         query = query.where(
-            TradingResults.
-            delivery_type_id.in_(filters.delivery_type_id)
-            )
+            TradingResults.delivery_type_id.in_(filters.delivery_type_id)
+        )
 
     return query
 
@@ -27,9 +25,9 @@ def make_cache_key(prefix: str, params: dict) -> str:
     return f"{prefix}:{hashlib.md5(raw.encode()).hexdigest()}"
 
 
-def get_date_for_prefix(date: dict[str: datetime]) -> str:
-    start_date = date['start_date'].strftime('%Y.%m.%d.%H:%M')
-    end_date = date['end_date'].strftime('%Y.%m.%d.%H:%M')
+def get_date_for_prefix(date: dict[str:datetime]) -> str:
+    start_date = date["start_date"].strftime("%Y.%m.%d.%H:%M")
+    end_date = date["end_date"].strftime("%Y.%m.%d.%H:%M")
 
     return f"{start_date}-{end_date}"
 
