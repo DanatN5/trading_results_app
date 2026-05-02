@@ -1,9 +1,11 @@
 import json
 
+from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cache_storage import CacheStorage
 from app.dependencies import get_cache_storage, get_db, get_filters
 from app.helpers import (
     get_date_for_prefix,
@@ -17,12 +19,14 @@ from app.schemas import FiltersBase, PeriodBase
 
 router = APIRouter()
 
+CacheDep = Annotated[CacheStorage, Depends(get_cache_storage)]
+DbDep = Annotated[AsyncSession, Depends(get_db)]
 
 @router.get("/trading_days")
 async def get_last_trading_dates(
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
+    cache: CacheDep,
     days_count: int = 0,
-    cache=Depends(get_cache_storage),
 ) -> list[str]:
 
     params = days_count
@@ -54,9 +58,9 @@ async def get_last_trading_dates(
 
 @router.get("/get_trading_results")
 async def get_trading_results(
+    db: DbDep,
+    redis: CacheDep,
     filters: FiltersBase = Depends(get_filters),
-    db: AsyncSession = Depends(get_db),
-    redis=Depends(get_cache_storage),
 ) -> list[str]:
     params = filters.model_dump(exclude_none=True)
     cache_key = make_cache_key("results", params)

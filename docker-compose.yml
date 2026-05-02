@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: trading_results_app
+    
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+      alembic upgrade head && 
+      uvicorn app.main:app --host 0.0.0.0 --port 8000
+      "
+
+  
+  db:
+    image: postgres:15
+    container_name: trading_results_db
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
