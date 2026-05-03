@@ -3,14 +3,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
 
+    POSTGRES_DB: str = "trade_parser"
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
+    DATABASE_URL: str
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
-
-    DB_NAME: str = "trade_parser"
-    DB_HOST: str = "localhost"
-    DB_PORT: int = 5432
-    DB_USER: str = "postgres"
-    DB_PASS: str = "postgres"
 
     DEBUG: bool = True
 

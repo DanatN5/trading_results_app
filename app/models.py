@@ -19,6 +19,16 @@ class TradingResults(Base):
     volume: Mapped[int] = mapped_column(Integer)
     total: Mapped[int] = mapped_column(Integer)
     count: Mapped[int] = mapped_column(Integer)
-    date: Mapped[datetime] = mapped_column(DateTime)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_on: Mapped[datetime] = mapped_column(DateTime)
     updated_on: Mapped[datetime] = mapped_column(DateTime)
+
+    def to_dict(self):
+        result = {}
+        for col in self.__table__.columns:
+            value = getattr(self, col.name)
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            result[col.name] = value
+        return result
+

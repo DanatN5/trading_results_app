@@ -1,19 +1,14 @@
 import json
+from datetime import datetime
 
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cache_storage import CacheStorage
+from app.cache_storage import CacheStorage, get_date_for_prefix, get_ttl
 from app.dependencies import get_cache_storage, get_db, get_filters
-from app.helpers import (
-    get_date_for_prefix,
-    get_query,
-    get_ttl,
-    make_cache_key,
-    to_dict,
-)
+from app.helpers import get_query, to_dict
 from app.models import TradingResults
 from app.schemas import FiltersBase, PeriodBase
 
@@ -30,8 +25,7 @@ async def get_last_trading_dates(
 ) -> list[str]:
 
     params = days_count
-    print(params)
-    cache_key = make_cache_key("days", params)
+    cache_key = cache.get_key("days", params)
 
     cached = await cache.get_cache(cache_key)
     if cached:
@@ -46,28 +40,25 @@ async def get_last_trading_dates(
         query = query.limit(days_count)
     dates = await db.execute(query)
     results = dates.scalars().all()
+    data = [date.strftime("%Y-%m-%dT%H:%M") for date in results]
 
-    await cache.set_cache(
-        cache_key,
-        json.dumps([date.strftime("%Y.%m.%d.%H:%M") for date in results]),
-        ex=get_ttl(),
-    )
+    await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
-    return results
+    return data
 
 
 @router.get("/get_trading_results")
 async def get_trading_results(
     db: DbDep,
-    redis: CacheDep,
+    cache: CacheDep,
     filters: FiltersBase = Depends(get_filters),
-) -> list[str]:
+) -> list[dict]:
     params = filters.model_dump(exclude_none=True)
-    cache_key = make_cache_key("results", params)
+    cache_key = cache.get_key("results", params)
 
-    cached = await redis.get(cache_key)
+    cached = await cache.get_cache(cache_key)
     if cached:
-        return json.loads(cached)
+        return cached
 
     query = select(TradingResults)
     if filters:
@@ -75,28 +66,29 @@ async def get_trading_results(
 
     result = await db.execute(query)
     results = result.scalars().all()
+    data = [to_dict(i) for i in results]
 
-    await redis.set(
-        cache_key, json.dumps([to_dict(i) for i in results]), ex=get_ttl()
-    )
+    await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
-    return results
+    return data
 
 
 @router.post("/get_dynamics")
 async def get_dynamics(
     peirod: PeriodBase,
+    cache: CacheDep,
+    db: DbDep,
     filters: FiltersBase = Depends(get_filters),
-    db: AsyncSession = Depends(get_db),
-    redis=Depends(get_cache_storage),
-) -> list[str]:
+) -> list[dict]:
+    
     params = filters.model_dump(exclude_none=True)
     prefix = get_date_for_prefix(peirod.model_dump(exclude_none=True))
-    cache_key = make_cache_key(prefix, params)
+    cache_key = cache.get_key(prefix, params)
 
-    cached = await redis.get(cache_key)
+    cached = await cache.get_cache(cache_key)
     if cached:
-        return json.loads(cached)
+        print('fdf')
+        return cached
 
     query = select(TradingResults).where(
         TradingResults.date.between(peirod.start_date, peirod.end_date)
@@ -107,8 +99,8 @@ async def get_dynamics(
     result = await db.execute(query)
     dynamics = result.scalars().all()
 
-    await redis.set(
-        cache_key, json.dumps([to_dict(i) for i in dynamics]), ex=get_ttl()
-    )
+    data = [to_dict(i) for i in dynamics]
 
-    return dynamics
+    await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
+
+    return data

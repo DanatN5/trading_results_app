@@ -12,7 +12,7 @@ def get_filters(
     oil_id: Optional[list[str]] = Query(None),
     delivery_type_id: Optional[list[str]] = Query(None),
     delivery_basis_id: Optional[list[str]] = Query(None),
-):
+) -> FiltersBase:
     return FiltersBase(
         oil_id=oil_id,
         delivery_type_id=delivery_type_id,
