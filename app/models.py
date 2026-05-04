@@ -23,7 +23,7 @@ class TradingResults(Base):
     created_on: Mapped[datetime] = mapped_column(DateTime)
     updated_on: Mapped[datetime] = mapped_column(DateTime)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         result = {}
         for col in self.__table__.columns:
             value = getattr(self, col.name)
@@ -31,4 +31,3 @@ class TradingResults(Base):
                 value = value.isoformat()
             result[col.name] = value
         return result
-

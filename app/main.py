@@ -10,15 +10,15 @@ app.include_router(router=router, prefix="/v1")
 
 
 @app.get("/api/healthchecker")
-def check():
+def check() -> dict:
     return {"message": "Hello"}
 
 
 @app.get("/openapi.yaml", include_in_schema=False)
-def openapi_yaml():
+def openapi_yaml() -> Response:
     return Response(
         content=yaml.safe_dump(
-            app.openapi(), sort_keys=False, allow_unicode=True
+            app.openapi(), sort_keys=False, allow_unicode=True,
         ),
         media_type="application/yaml",
     )

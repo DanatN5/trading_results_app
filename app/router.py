@@ -1,7 +1,6 @@
 import json
-from datetime import datetime
-
 from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +15,8 @@ router = APIRouter()
 
 CacheDep = Annotated[CacheStorage, Depends(get_cache_storage)]
 DbDep = Annotated[AsyncSession, Depends(get_db)]
+FiltersDep = Annotated[FiltersBase, Depends(get_filters)]
+
 
 @router.get("/trading_days")
 async def get_last_trading_dates(
@@ -51,7 +52,7 @@ async def get_last_trading_dates(
 async def get_trading_results(
     db: DbDep,
     cache: CacheDep,
-    filters: FiltersBase = Depends(get_filters),
+    filters: FiltersDep,
 ) -> list[dict]:
     params = filters.model_dump(exclude_none=True)
     cache_key = cache.get_key("results", params)
@@ -78,20 +79,19 @@ async def get_dynamics(
     peirod: PeriodBase,
     cache: CacheDep,
     db: DbDep,
-    filters: FiltersBase = Depends(get_filters),
+    filters: FiltersDep,
 ) -> list[dict]:
-    
+
     params = filters.model_dump(exclude_none=True)
     prefix = get_date_for_prefix(peirod.model_dump(exclude_none=True))
     cache_key = cache.get_key(prefix, params)
 
     cached = await cache.get_cache(cache_key)
     if cached:
-        print('fdf')
         return cached
 
     query = select(TradingResults).where(
-        TradingResults.date.between(peirod.start_date, peirod.end_date)
+        TradingResults.date.between(peirod.start_date, peirod.end_date),
     )
     if filters:
         query = get_query(query, filters)
