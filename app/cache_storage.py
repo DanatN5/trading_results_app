@@ -1,4 +1,3 @@
-import hashlib
 import json
 from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol
@@ -11,9 +10,6 @@ class CacheStorage(Protocol):
         pass
 
     async def set_cache(self, value: list[Any], key: str, ttl: int) -> None:
-        pass
-
-    def get_key(self, prefix: str, params: Any) -> str:
         pass
 
 
@@ -30,9 +26,12 @@ class RedisCacheStorage:
     async def set_cache(self, key: str, value: list[Any], ex: int) -> None:
         await self.client.set(key, value, ex=ex)
 
-    def get_key(self, prefix: str, params: int | dict) -> str:
-        raw = json.dumps(params, sort_keys=True)
-        return f"{prefix}:{hashlib.md5(raw.encode()).hexdigest()}"
+
+def get_key(prefix: str, params: int | dict) -> str:
+
+    key = params if isinstance(params, int) else params.items()
+    
+    return f"{prefix}:{key}"
 
 
 def get_date_for_prefix(date: dict[str:datetime]) -> str:

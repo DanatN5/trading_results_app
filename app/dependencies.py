@@ -1,5 +1,5 @@
 
-from asyncio import AsyncGenerator
+from typing import AsyncGenerator
 
 from fastapi import Query
 from sqlalchemy.ext.asyncio import AsyncSession

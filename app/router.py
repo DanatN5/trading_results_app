@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cache_storage import CacheStorage, get_date_for_prefix, get_ttl
+from app.cache_storage import CacheStorage, get_date_for_prefix, get_key, get_ttl
 from app.dependencies import get_cache_storage, get_db, get_filters
-from app.helpers import get_query, to_dict
+from app.helpers import get_query
 from app.models import TradingResults
 from app.schemas import FiltersBase, PeriodBase
 
@@ -26,7 +26,7 @@ async def get_last_trading_dates(
 ) -> list[str]:
 
     params = days_count
-    cache_key = cache.get_key("days", params)
+    cache_key = get_key("days", params)
 
     cached = await cache.get_cache(cache_key)
     if cached:
@@ -55,7 +55,7 @@ async def get_trading_results(
     filters: FiltersDep,
 ) -> list[dict]:
     params = filters.model_dump(exclude_none=True)
-    cache_key = cache.get_key("results", params)
+    cache_key = get_key("results", params)
 
     cached = await cache.get_cache(cache_key)
     if cached:
@@ -67,7 +67,7 @@ async def get_trading_results(
 
     result = await db.execute(query)
     results = result.scalars().all()
-    data = [to_dict(i) for i in results]
+    data = [i.to_dict() for i in results]
 
     await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
@@ -84,7 +84,7 @@ async def get_dynamics(
 
     params = filters.model_dump(exclude_none=True)
     prefix = get_date_for_prefix(peirod.model_dump(exclude_none=True))
-    cache_key = cache.get_key(prefix, params)
+    cache_key = get_key(prefix, params)
 
     cached = await cache.get_cache(cache_key)
     if cached:
@@ -99,7 +99,7 @@ async def get_dynamics(
     result = await db.execute(query)
     dynamics = result.scalars().all()
 
-    data = [to_dict(i) for i in dynamics]
+    data = [i.to_dict() for i in dynamics]
 
     await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
