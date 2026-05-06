@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_PASSWORD: str
     DATABASE_URL: str
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379

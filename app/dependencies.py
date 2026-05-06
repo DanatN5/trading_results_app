@@ -1,5 +1,6 @@
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Annotated
 
 from fastapi import Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,11 +10,13 @@ from app.database import AsyncSessionLocal
 from app.redis_config import redis_client
 from app.schemas import FiltersBase
 
+Annotated[list[str] | None, Query()] = None
+
 
 def get_filters(
-    oil_id: list[str] | None = Query(None),
-    delivery_type_id: list[str] | None = Query(None),
-    delivery_basis_id: list[str] | None = Query(None),
+    oil_id: Annotated[list[str] | None, Query()] = None,
+    delivery_type_id: Annotated[list[str] | None, Query()] = None,
+    delivery_basis_id: Annotated[list[str] | None, Query()] = None,
 ) -> FiltersBase:
     return FiltersBase(
         oil_id=oil_id,

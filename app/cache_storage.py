@@ -30,7 +30,7 @@ class RedisCacheStorage:
 def get_key(prefix: str, params: int | dict) -> str:
 
     key = params if isinstance(params, int) else params.items()
-    
+
     return f"{prefix}:{key}"
 
 
