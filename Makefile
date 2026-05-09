@@ -8,7 +8,7 @@ lint:
 	uv run ruff check
 
 migarate:
-	alembic upgread head
+	alembic upgrade head
 
 up:
 	docker compose up

@@ -10,9 +10,6 @@ from app.database import AsyncSessionLocal
 from app.redis_config import redis_client
 from app.schemas import FiltersBase
 
-Annotated[list[str] | None, Query()] = None
-
-
 def get_filters(
     oil_id: Annotated[list[str] | None, Query()] = None,
     delivery_type_id: Annotated[list[str] | None, Query()] = None,

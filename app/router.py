@@ -13,15 +13,15 @@ from app.schemas import FiltersBase, PeriodBase
 
 router = APIRouter()
 
-CacheDep = Annotated[CacheStorage, Depends(get_cache_storage)]
-DbDep = Annotated[AsyncSession, Depends(get_db)]
-FiltersDep = Annotated[FiltersBase, Depends(get_filters)]
+CacheDependency = Annotated[CacheStorage, Depends(get_cache_storage)]
+DataBaseDependency = Annotated[AsyncSession, Depends(get_db)]
+FiltersDependency = Annotated[FiltersBase, Depends(get_filters)]
 
 
 @router.get("/trading_days")
 async def get_last_trading_dates(
-    db: DbDep,
-    cache: CacheDep,
+    db: DataBaseDependency,
+    cache: CacheDependency,
     days_count: int = 0,
 ) -> list[str]:
 
@@ -50,9 +50,9 @@ async def get_last_trading_dates(
 
 @router.get("/get_trading_results")
 async def get_trading_results(
-    db: DbDep,
-    cache: CacheDep,
-    filters: FiltersDep,
+    db: DataBaseDependency,
+    cache: CacheDependency,
+    filters: FiltersDependency,
 ) -> list[dict]:
     params = filters.model_dump(exclude_none=True)
     cache_key = get_key("results", params)
@@ -67,7 +67,7 @@ async def get_trading_results(
 
     result = await db.execute(query)
     results = result.scalars().all()
-    data = [i.to_dict() for i in results]
+    data = [table.to_dict() for table in results]
 
     await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
@@ -77,9 +77,9 @@ async def get_trading_results(
 @router.post("/get_dynamics")
 async def get_dynamics(
     peirod: PeriodBase,
-    cache: CacheDep,
-    db: DbDep,
-    filters: FiltersDep,
+    cache: CacheDependency,
+    db: DataBaseDependency,
+    filters: FiltersDependency,
 ) -> list[dict]:
 
     params = filters.model_dump(exclude_none=True)
@@ -99,7 +99,7 @@ async def get_dynamics(
     result = await db.execute(query)
     dynamics = result.scalars().all()
 
-    data = [i.to_dict() for i in dynamics]
+    data = [table.to_dict() for table in dynamics]
 
     await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
