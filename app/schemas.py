@@ -9,7 +9,7 @@ class FiltersBase(BaseModel):
     delivery_basis_id: list[str] | None = None
 
 
-class PeriodBase(BaseModel):
+class IntervalBase(BaseModel):
     start_date: datetime = Field(..., lt=datetime.now(tz=UTC))
     end_date: datetime
 

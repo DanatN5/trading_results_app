@@ -6,42 +6,34 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache_storage import CacheStorage, get_date_for_prefix, get_key, get_ttl
-from app.dependencies import get_cache_storage, get_db, get_filters
+from app.dependencies import get_cache_storage, get_db, get_filters, get_repo
 from app.helpers import get_query
 from app.models import TradingResults
-from app.schemas import FiltersBase, PeriodBase
+from app.schemas import FiltersBase, IntervalBase
+from app.repository import Repository
 
 router = APIRouter()
 
 CacheDependency = Annotated[CacheStorage, Depends(get_cache_storage)]
-DataBaseDependency = Annotated[AsyncSession, Depends(get_db)]
+Db = Annotated[AsyncSession, Depends(get_db)]
 FiltersDependency = Annotated[FiltersBase, Depends(get_filters)]
+DataBaseDependency = Annotated[Repository, Depends(get_repo)]
 
 
 @router.get("/trading_days")
 async def get_last_trading_dates(
-    db: DataBaseDependency,
+    repo: DataBaseDependency,
     cache: CacheDependency,
     days_count: int = 0,
 ) -> list[str]:
 
-    params = days_count
-    cache_key = get_key("days", params)
+    cache_key = get_key("days", days_count)
 
     cached = await cache.get_cache(cache_key)
     if cached:
         return cached
 
-    query = (
-        select(TradingResults.date)
-        .distinct()
-        .order_by(desc(TradingResults.date))
-    )
-    if days_count:
-        query = query.limit(days_count)
-    dates = await db.execute(query)
-    results = dates.scalars().all()
-    data = [date.strftime("%Y-%m-%dT%H:%M") for date in results]
+    data = await repo.get_dates(days_count)
 
     await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
@@ -50,7 +42,7 @@ async def get_last_trading_dates(
 
 @router.get("/get_trading_results")
 async def get_trading_results(
-    db: DataBaseDependency,
+    repo: DataBaseDependency,
     cache: CacheDependency,
     filters: FiltersDependency,
 ) -> list[dict]:
@@ -61,13 +53,7 @@ async def get_trading_results(
     if cached:
         return cached
 
-    query = select(TradingResults)
-    if filters:
-        query = get_query(query, filters)
-
-    result = await db.execute(query)
-    results = result.scalars().all()
-    data = [table.to_dict() for table in results]
+    data = await repo.get(filters)
 
     await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 
@@ -76,30 +62,21 @@ async def get_trading_results(
 
 @router.post("/get_dynamics")
 async def get_dynamics(
-    peirod: PeriodBase,
+    interval: IntervalBase,
     cache: CacheDependency,
-    db: DataBaseDependency,
+    repo: DataBaseDependency,
     filters: FiltersDependency,
 ) -> list[dict]:
 
     params = filters.model_dump(exclude_none=True)
-    prefix = get_date_for_prefix(peirod.model_dump(exclude_none=True))
+    prefix = get_date_for_prefix(interval.model_dump(exclude_none=True))
     cache_key = get_key(prefix, params)
 
     cached = await cache.get_cache(cache_key)
     if cached:
         return cached
 
-    query = select(TradingResults).where(
-        TradingResults.date.between(peirod.start_date, peirod.end_date),
-    )
-    if filters:
-        query = get_query(query, filters)
-
-    result = await db.execute(query)
-    dynamics = result.scalars().all()
-
-    data = [table.to_dict() for table in dynamics]
+    data = await repo.get(filters, interval)
 
     await cache.set_cache(cache_key, json.dumps(data), ex=get_ttl())
 

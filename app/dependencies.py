@@ -2,13 +2,14 @@
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
-from fastapi import Query
+from fastapi import Query, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache_storage import CacheStorage, RedisCacheStorage
 from app.database import AsyncSessionLocal
 from app.redis_config import redis_client
 from app.schemas import FiltersBase
+from app.repository import SQLAlchemyRepo
 
 def get_filters(
     oil_id: Annotated[list[str] | None, Query()] = None,
@@ -26,6 +27,13 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
 
+async def get_repo(
+        session: Annotated[AsyncSession, Depends(get_db)]
+        ) -> SQLAlchemyRepo:
+    return SQLAlchemyRepo(session)
+
 
 def get_cache_storage() -> CacheStorage:
     return RedisCacheStorage(redis_client)
+
+
