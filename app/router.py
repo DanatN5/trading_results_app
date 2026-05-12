@@ -2,20 +2,16 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache_storage import CacheStorage, get_date_for_prefix, get_key, get_ttl
 from app.dependencies import get_cache_storage, get_db, get_filters, get_repo
-from app.helpers import get_query
-from app.models import TradingResults
 from app.schemas import FiltersBase, IntervalBase
 from app.repository import Repository
 
 router = APIRouter()
 
 CacheDependency = Annotated[CacheStorage, Depends(get_cache_storage)]
-Db = Annotated[AsyncSession, Depends(get_db)]
 FiltersDependency = Annotated[FiltersBase, Depends(get_filters)]
 DataBaseDependency = Annotated[Repository, Depends(get_repo)]
 

@@ -6,9 +6,9 @@ from app.schemas import FiltersBase, IntervalBase
 from app.helpers import get_query
 
 class Repository(Protocol):
-    async def get_dates(self, days_count: int) -> Any: pass
+    async def get_dates(self, days_count: int) -> list[str]: pass
 
-    async def get(self, filters: FiltersBase, interval: IntervalBase = None) -> Any: pass
+    async def get(self, filters: FiltersBase, interval: IntervalBase = None) -> list[dict]: pass
 
 
 
@@ -16,7 +16,7 @@ class SQLAlchemyRepo:
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def get_dates(self, days_count: int):
+    async def get_dates(self, days_count: int) -> list[str]:
         query = (
         select(TradingResults.date)
         .distinct()
@@ -30,7 +30,7 @@ class SQLAlchemyRepo:
 
         return data
     
-    async def get(self, filters: FiltersBase, interval:IntervalBase = None) -> Any:
+    async def get(self, filters: FiltersBase, interval:IntervalBase = None) -> list[dict]:
 
         query = select(TradingResults)
         if interval:
