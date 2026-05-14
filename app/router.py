@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache_storage import CacheStorage, get_date_for_prefix, get_key, get_ttl
 from app.dependencies import get_cache_storage, get_db, get_filters, get_repo
-from app.schemas import FiltersBase, IntervalBase
+from app.schemas import FiltersBase, IntervalBase, ResultsBase
 from app.repository import Repository
 
 router = APIRouter()
@@ -41,7 +41,7 @@ async def get_trading_results(
     repo: DataBaseDependency,
     cache: CacheDependency,
     filters: FiltersDependency,
-) -> list[dict]:
+) -> list[ResultsBase]:
     params = filters.model_dump(exclude_none=True)
     cache_key = get_key("results", params)
 
@@ -62,7 +62,7 @@ async def get_dynamics(
     cache: CacheDependency,
     repo: DataBaseDependency,
     filters: FiltersDependency,
-) -> list[dict]:
+) -> list[ResultsBase]:
 
     params = filters.model_dump(exclude_none=True)
     prefix = get_date_for_prefix(interval.model_dump(exclude_none=True))

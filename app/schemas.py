@@ -19,3 +19,19 @@ class IntervalBase(BaseModel):
             msg = "Конечная дата должна быть раньше начальной"
             raise ValueError(msg)
         return self
+
+
+class ResultsBase(BaseModel):
+    id: int
+    exchange_product_id: str
+    exchange_product_name: str
+    oil_id: str
+    delivery_basis_id: str
+    delivery_basis_name: str
+    delivery_type_id: str
+    volume: int
+    total: int
+    count: int
+    date: str
+    created_on: str
+    updated_on: str

@@ -1,8 +1,3 @@
-database = [
-    "2026-05-12",
-    "2026-05-11",
-    "2026-05-10"
-    ]
 
 CACHE_HIT = {
     "days_count": 1,
@@ -13,7 +8,14 @@ CACHE_HIT = {
 }
 
 CACHE_MISS = {
-    "days_count": 1,
+    "cached": None,
+    "repo_data": ["2026-05-12"],
+    "expected_repo_calls": 1,
+    "expected_cache_calls": 1,
+}
+
+INVALID_QUERY = {
+    "days_count": "one",
     "cached": None,
     "repo_data": ["2026-05-12"],
     "expected_repo_calls": 0,
