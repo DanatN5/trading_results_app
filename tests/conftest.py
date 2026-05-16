@@ -2,9 +2,13 @@ import pytest
 
 from unittest.mock import AsyncMock
 from httpx import AsyncClient, ASGITransport
+from testcontainers.postgres import PostgresContainer
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.main import app
 from app.dependencies import get_repo, get_filters, get_cache_storage
+from app.database import Base
+from app.models import TradingResults
 
 
 @pytest.fixture
@@ -27,4 +31,7 @@ async def client(mock_repo, mock_cache):
         yield ac
     
     app.dependency_overrides.clear()
+
+
+
 
